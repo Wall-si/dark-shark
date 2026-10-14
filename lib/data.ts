@@ -1,0 +1,815 @@
+import { extraProducts, extraVendors } from "./extra";
+import { legacyRu } from "./legacy-ru";
+import type { CartLine, Category, District, Product, Vendor } from "./types";
+import { categories } from "./types";
+
+export { categories };
+export type { Category };
+
+export const districts: District[] = [
+  {
+    id: "gutter",
+    name: "The Gutter",
+    x: 150,
+    y: 500,
+    note: "Floodlit alleys where serial numbers go to die.",
+  },
+  {
+    id: "dock",
+    name: "Dock Spine",
+    x: 210,
+    y: 350,
+    note: "Cranes, salt, and manifests with the names scratched out.",
+  },
+  {
+    id: "chrome",
+    name: "Chrome Ward",
+    x: 360,
+    y: 230,
+    note: "Clinics that never ask whose bones those used to be.",
+  },
+  {
+    id: "silt",
+    name: "Silt Bridge",
+    x: 490,
+    y: 430,
+    note: "The only honest crossing is the one you pay for twice.",
+  },
+  {
+    id: "ash",
+    name: "Ash Canals",
+    x: 560,
+    y: 270,
+    note: "Signal fog. Drones nest in the chimneys.",
+  },
+  {
+    id: "glass",
+    name: "Upper Glass",
+    x: 710,
+    y: 150,
+    note: "Executive weather. Rain is on the calendar.",
+  },
+  {
+    id: "redline",
+    name: "Redline Yards",
+    x: 840,
+    y: 340,
+    note: "Engines, armor, and titles that were never filed.",
+  },
+  {
+    id: "mast",
+    name: "North Mast",
+    x: 900,
+    y: 80,
+    note: "Frey's antenna. The city checks in, or it doesn't.",
+  },
+];
+
+export const relays: [string, string][] = [
+  ["gutter", "dock"],
+  ["dock", "chrome"],
+  ["dock", "silt"],
+  ["chrome", "ash"],
+  ["chrome", "glass"],
+  ["silt", "ash"],
+  ["silt", "redline"],
+  ["ash", "glass"],
+  ["ash", "redline"],
+  ["glass", "mast"],
+  ["glass", "redline"],
+  ["redline", "mast"],
+];
+
+const coreVendors: Vendor[] = [
+  {
+    id: "vex",
+    name: "Vex Kade",
+    role: "Street surgeon",
+    districtId: "chrome",
+    score: 93,
+    specialty: "Cyberware",
+    since: "2069",
+    motto: "If it hurts, it was installed correctly.",
+    bio: "Vex runs a white-tile clinic with a red drain. Corporate talent arrives after midnight and leaves with a new opinion about pain.",
+    status: "LIVE",
+  },
+  {
+    id: "nill",
+    name: "Nill Oslo",
+    role: "Yard armorer",
+    districtId: "redline",
+    score: 81,
+    specialty: "Weapons",
+    since: "2071",
+    motto: "A tool is just a contract with physics.",
+    bio: "Nill sells instruments, not alibis. Every lot leaves the yard with a serial that already belonged to someone else.",
+    status: "LIVE",
+  },
+  {
+    id: "helix",
+    name: "Helix Jun",
+    role: "Splice engineer",
+    districtId: "silt",
+    score: 88,
+    specialty: "Cyberware / Tech",
+    since: "2074",
+    motto: "The body is a port. Treat it like one.",
+    bio: "Helix works the bridge between meat and signal. Their bench is cleaner than most hospitals and less sentimental.",
+    status: "QUIET",
+  },
+  {
+    id: "saint",
+    name: "Saint Relay",
+    role: "Signal broker",
+    districtId: "ash",
+    score: 96,
+    specialty: "Tech",
+    since: "2068",
+    motto: "Noise is a luxury. I sell the opposite.",
+    bio: "Saint keeps the canals audible. Decks, jammers, and drones move through a chapel that has not held a service in forty years.",
+    status: "LIVE",
+  },
+  {
+    id: "morrow",
+    name: "Morrow Quay",
+    role: "Title forger",
+    districtId: "dock",
+    score: 74,
+    specialty: "Vehicles",
+    since: "2072",
+    motto: "If it moves, it can be untitled.",
+    bio: "Morrow's yard smells like coolant and fresh paper. The vehicles are real. The owners are a suggestion.",
+    status: "WATCHED",
+  },
+  {
+    id: "ada",
+    name: "Ada Veil",
+    role: "Archivist",
+    districtId: "glass",
+    score: 99,
+    specialty: "Intelligence",
+    since: "2066",
+    motto: "Secrets appreciate. I collect the interest.",
+    bio: "Ada sells context to people who already have guns. Her dossiers are short, expensive, and usually correct.",
+    status: "LIVE",
+  },
+  {
+    id: "puck",
+    name: "Puck Nine",
+    role: "Gutter clerk",
+    districtId: "gutter",
+    score: 61,
+    specialty: "Black Market",
+    since: "2078",
+    motto: "Ask quieter.",
+    bio: "Puck moves blanks, kits, and rumors from a kiosk that changes color once a week. Reputation is thin. Stock is not.",
+    status: "WATCHED",
+  },
+  {
+    id: "frey",
+    name: "The Frey Desk",
+    role: "House broker",
+    districtId: "mast",
+    score: 100,
+    specialty: "Everything with a margin",
+    since: "2064",
+    motto: "We don't follow the market. We own it.",
+    bio: "Boryn Frey's own window. The lots here are not cheaper. They are simply inevitable.",
+    status: "LIVE",
+  },
+];
+
+const coreProducts: Product[] = [
+  {
+    id: "rift-optic",
+    sku: "DS-1001",
+    name: "Rift Optic Array",
+    category: "Cyberware",
+    price: 4800,
+    vendorId: "vex",
+    rarity: "RARE",
+    stock: 6,
+    heat: 72,
+    delta: 4.2,
+    tagline: "The city, itemized.",
+    description:
+      "A paired optic that paints Vesper as a column of prices, names, and exit routes. Vex swears the reticle is only a courtesy. Clients swear they stop looking at faces.",
+    specs: [
+      { k: "Mount", v: "Orbital cradle" },
+      { k: "Feed", v: "Local mesh / offline" },
+      { k: "Signature", v: "Low" },
+      { k: "Recovery", v: "36 hours" },
+    ],
+    origin: "Chrome Ward clinic",
+    clearance: "STREET+",
+  },
+  {
+    id: "tendon-coil",
+    sku: "DS-1002",
+    name: "Tendon Coil S-9",
+    category: "Cyberware",
+    price: 7200,
+    vendorId: "vex",
+    rarity: "RESTRICTED",
+    stock: 3,
+    heat: 81,
+    delta: 1.1,
+    tagline: "Hesitation, repriced.",
+    description:
+      "Coiled fiber seated along the forearm. It does not make a person brave. It makes the pause between decision and impact expensive to keep.",
+    specs: [
+      { k: "Site", v: "Forearm sheath" },
+      { k: "Load", v: "Class III" },
+      { k: "Heat dump", v: "Skin shunt" },
+      { k: "Service", v: "90 days" },
+    ],
+    origin: "Unmarked Vex bench",
+    clearance: "TIER 2",
+  },
+  {
+    id: "marrow-lace",
+    sku: "DS-1003",
+    name: "Marrow Lace",
+    category: "Cyberware",
+    price: 12400,
+    vendorId: "helix",
+    rarity: "RARE",
+    stock: 4,
+    heat: 64,
+    delta: -0.6,
+    tagline: "Armor that pretends to be bone.",
+    description:
+      "A woven subdermal lattice. From the outside you look underdressed. From the inside, doors and bad luck have to try harder.",
+    specs: [
+      { k: "Coverage", v: "Torso lattice" },
+      { k: "Profile", v: "Concealed" },
+      { k: "Mass", v: "+1.4 kg" },
+      { k: "Scan", v: "Reads as scar tissue" },
+    ],
+    origin: "Silt Bridge loft",
+    clearance: "TIER 2",
+  },
+  {
+    id: "hush-lung",
+    sku: "DS-1004",
+    name: "Hush Lung Filter",
+    category: "Cyberware",
+    price: 3150,
+    vendorId: "helix",
+    rarity: "STREET",
+    stock: 11,
+    heat: 44,
+    delta: 0.4,
+    tagline: "Breathe the expensive air.",
+    description:
+      "A quiet filter for canals, clubs, and rooms where the ventilation is a rumor. It will not make the city clean. It will make you last longer in it.",
+    specs: [
+      { k: "Site", v: "Bronchial clip" },
+      { k: "Cycle", v: "140 hours" },
+      { k: "Noise", v: "None" },
+      { k: "Swap", v: "Cartridge" },
+    ],
+    origin: "Ash surplus",
+    clearance: "OPEN",
+  },
+  {
+    id: "reflex-spur",
+    sku: "DS-1005",
+    name: "Reflex Spur",
+    category: "Cyberware",
+    price: 9900,
+    vendorId: "vex",
+    rarity: "RESTRICTED",
+    stock: 2,
+    heat: 88,
+    delta: 6.1,
+    tagline: "A head start, surgically.",
+    description:
+      "A nerve shunt that spends your future attention in advance. Popular with couriers who intend to still be couriers next month.",
+    specs: [
+      { k: "Site", v: "Cervical tap" },
+      { k: "Window", v: "0.4 s" },
+      { k: "Cost", v: "Migraine, later" },
+      { k: "Lock", v: "Biometric" },
+    ],
+    origin: "Chrome Ward, after hours",
+    clearance: "TIER 3",
+  },
+  {
+    id: "red-keel",
+    sku: "DS-1101",
+    name: "Red Keel",
+    category: "Weapons",
+    price: 6400,
+    vendorId: "nill",
+    rarity: "RARE",
+    stock: 5,
+    heat: 77,
+    delta: 2.4,
+    tagline: "A sidearm with a dress code.",
+    description:
+      "Compact pulse sidearm finished in house red. Nill will not discuss what it does to a door. The door is not the client.",
+    specs: [
+      { k: "Class", v: "Sidearm" },
+      { k: "Cell", v: "Kiln micro" },
+      { k: "Signature", v: "Bright" },
+      { k: "Mass", v: "1.1 kg" },
+    ],
+    origin: "Redline Yards",
+    clearance: "YARD PASS",
+  },
+  {
+    id: "choir-rail",
+    sku: "DS-1102",
+    name: "Choir Rail",
+    category: "Weapons",
+    price: 18750,
+    vendorId: "nill",
+    rarity: "RESTRICTED",
+    stock: 2,
+    heat: 91,
+    delta: 3.3,
+    tagline: "Long gun. Short argument.",
+    description:
+      "A carbine that sings on the way out and stays quiet about who paid. Restricted because the yards got tired of explaining the holes.",
+    specs: [
+      { k: "Class", v: "Carbine" },
+      { k: "Brace", v: "Folding" },
+      { k: "Signature", v: "Severe" },
+      { k: "Finish", v: "Matte void" },
+    ],
+    origin: "Redline private cage",
+    clearance: "TIER 3",
+  },
+  {
+    id: "glass-fang",
+    sku: "DS-1103",
+    name: "Glass Fang",
+    category: "Weapons",
+    price: 11200,
+    vendorId: "frey",
+    rarity: "BLACK",
+    stock: 3,
+    heat: 69,
+    delta: 0.8,
+    tagline: "A conversation you can fold.",
+    description:
+      "Monofilament edged in a ceramic grip. The Frey Desk lists it under etiquette. Everyone else lists it under last resorts.",
+    specs: [
+      { k: "Class", v: "Melee" },
+      { k: "Carry", v: "Sheathed" },
+      { k: "Scan", v: "Ceramic null" },
+      { k: "Care", v: "Do not test on friends" },
+    ],
+    origin: "North Mast vault",
+    clearance: "BLACK CHANNEL",
+  },
+  {
+    id: "tide-hammer",
+    sku: "DS-1104",
+    name: "Tide Hammer",
+    category: "Weapons",
+    price: 8050,
+    vendorId: "nill",
+    rarity: "STREET",
+    stock: 7,
+    heat: 51,
+    delta: -1.4,
+    tagline: "For locks, knees, and policy.",
+    description:
+      "A weighted maul with a tide-line etched in the head. Dock crews use it on crates. Other people are less literal.",
+    specs: [
+      { k: "Class", v: "Maul" },
+      { k: "Mass", v: "4.8 kg" },
+      { k: "Head", v: "Replaceable" },
+      { k: "Style", v: "None" },
+    ],
+    origin: "Dock Spine",
+    clearance: "OPEN",
+  },
+  {
+    id: "abyss-deck",
+    sku: "DS-1201",
+    name: "Abyss Deck",
+    category: "Tech",
+    price: 22000,
+    vendorId: "saint",
+    rarity: "RESTRICTED",
+    stock: 2,
+    heat: 95,
+    delta: 7.6,
+    tagline: "A chapel in your pocket.",
+    description:
+      "Saint Relay's breach deck. It does not promise a way through every wall. It promises you will know the price of trying before you do.",
+    specs: [
+      { k: "Cores", v: "4 cold" },
+      { k: "Link", v: "Hardline / ghost" },
+      { k: "Case", v: "Canal proof" },
+      { k: "Aura", v: "Looks like a prayer book" },
+    ],
+    origin: "Ash Canals chapel",
+    clearance: "TIER 3",
+  },
+  {
+    id: "salt-jammer",
+    sku: "DS-1202",
+    name: "Salt Jammer",
+    category: "Tech",
+    price: 2400,
+    vendorId: "saint",
+    rarity: "STREET",
+    stock: 14,
+    heat: 58,
+    delta: 1.9,
+    tagline: "A minute of privacy. Maybe two.",
+    description:
+      "A brick that makes nearby radios forget their manners. Couriers tape it under a coat and pretend they are boring.",
+    specs: [
+      { k: "Radius", v: "Room scale" },
+      { k: "Life", v: "11 minutes" },
+      { k: "Recharge", v: "Kiln cell" },
+      { k: "Legal", v: "No" },
+    ],
+    origin: "Ash bench",
+    clearance: "OPEN",
+  },
+  {
+    id: "white-splice",
+    sku: "DS-1203",
+    name: "White Splice",
+    category: "Tech",
+    price: 1150,
+    vendorId: "helix",
+    rarity: "STREET",
+    stock: 20,
+    heat: 33,
+    delta: -0.2,
+    tagline: "Cable with a conscience problem.",
+    description:
+      "A shielded splice that carries a nervous system across a bad connector. Helix sells them in bundles. People lose them one at a time.",
+    specs: [
+      { k: "Length", v: "1.2 m" },
+      { k: "Shield", v: "Foil and spite" },
+      { k: "Ends", v: "Universal sulk" },
+      { k: "Color", v: "Paper white" },
+    ],
+    origin: "Silt Bridge",
+    clearance: "OPEN",
+  },
+  {
+    id: "moth-drone",
+    sku: "DS-1204",
+    name: "Moth Drone",
+    category: "Tech",
+    price: 5600,
+    vendorId: "saint",
+    rarity: "RARE",
+    stock: 6,
+    heat: 73,
+    delta: 2.2,
+    tagline: "It prefers lamps. And windows.",
+    description:
+      "A palm-sized recon moth. It loiters, listens, and returns with a picture of whoever thought the room was private.",
+    specs: [
+      { k: "Flight", v: "16 min" },
+      { k: "Eye", v: "Low light" },
+      { k: "Noise", v: "Cloth on cloth" },
+      { k: "Recall", v: "Whistle or panic" },
+    ],
+    origin: "Ash roost",
+    clearance: "STREET+",
+  },
+  {
+    id: "kiln-cell",
+    sku: "DS-1205",
+    name: "Kiln Cell",
+    category: "Tech",
+    price: 890,
+    vendorId: "puck",
+    rarity: "STREET",
+    stock: 30,
+    heat: 29,
+    delta: 0.1,
+    tagline: "Power, still warm from someone else's job.",
+    description:
+      "Standard cell, nonstandard provenance. Puck swears each one was recovered, not borrowed. The charge curve says otherwise, and still works.",
+    specs: [
+      { k: "Fit", v: "House standard" },
+      { k: "Charge", v: "82–100%" },
+      { k: "Mark", v: "Filed off" },
+      { k: "Pack", v: "Single" },
+    ],
+    origin: "The Gutter",
+    clearance: "OPEN",
+  },
+  {
+    id: "gutter-sled",
+    sku: "DS-1301",
+    name: "Gutter Sled",
+    category: "Vehicles",
+    price: 46000,
+    vendorId: "morrow",
+    rarity: "RARE",
+    stock: 2,
+    heat: 66,
+    delta: 1.5,
+    tagline: "Two wheels and a missing past.",
+    description:
+      "A canal bike with the title burned down to a polite fiction. Fast enough to regret, narrow enough for the Gutter.",
+    specs: [
+      { k: "Class", v: "Bike" },
+      { k: "Title", v: "Suggestive" },
+      { k: "Range", v: "220 km" },
+      { k: "Color", v: "Wet asphalt" },
+    ],
+    origin: "Dock Spine yard",
+    clearance: "YARD PASS",
+  },
+  {
+    id: "pall-coupe",
+    sku: "DS-1302",
+    name: "Pall Coupe",
+    category: "Vehicles",
+    price: 128000,
+    vendorId: "morrow",
+    rarity: "RESTRICTED",
+    stock: 1,
+    heat: 84,
+    delta: 4.8,
+    tagline: "Arrive as if you planned the city.",
+    description:
+      "Low coupe, black glass, and a passenger seat that has heard better lies. Morrow will deliver it to any garage that can keep a secret.",
+    specs: [
+      { k: "Class", v: "Coupe" },
+      { k: "Glass", v: "One-way" },
+      { k: "Title", v: "In transit" },
+      { k: "Seats", v: "2, theoretically" },
+    ],
+    origin: "Redline show cage",
+    clearance: "TIER 3",
+  },
+  {
+    id: "low-skiff",
+    sku: "DS-1303",
+    name: "Low Skiff",
+    category: "Vehicles",
+    price: 210000,
+    vendorId: "morrow",
+    rarity: "BLACK",
+    stock: 1,
+    heat: 79,
+    delta: -2.1,
+    tagline: "Cargo that does not wave back.",
+    description:
+      "A hauler that sits under the canal radar and over everyone's questions. The hold is empty. The price assumes you will fix that.",
+    specs: [
+      { k: "Class", v: "Hauler" },
+      { k: "Draft", v: "Shallow" },
+      { k: "Hold", v: "Sealed" },
+      { k: "Crew", v: "1 + silence" },
+    ],
+    origin: "Dock Spine, night berth",
+    clearance: "BLACK CHANNEL",
+  },
+  {
+    id: "glass-dossier",
+    sku: "DS-1401",
+    name: "Glass Ward Dossier",
+    category: "Intelligence",
+    price: 14500,
+    vendorId: "ada",
+    rarity: "RESTRICTED",
+    stock: 4,
+    heat: 86,
+    delta: 5.4,
+    tagline: "Who owns the weather.",
+    description:
+      "Ada's current file on Upper Glass: which towers are listening, which executives are borrowing courage, and which elevators do not stop for guests.",
+    specs: [
+      { k: "Pages", v: "40" },
+      { k: "Freshness", v: "11 days" },
+      { k: "Names", v: "Redacted until paid" },
+      { k: "Form", v: "Sealed chip" },
+    ],
+    origin: "Upper Glass archive",
+    clearance: "TIER 3",
+  },
+  {
+    id: "ledger-ghost",
+    sku: "DS-1402",
+    name: "Ledger Ghost",
+    category: "Intelligence",
+    price: 9200,
+    vendorId: "ada",
+    rarity: "RARE",
+    stock: 5,
+    heat: 90,
+    delta: 3.7,
+    tagline: "A feed of money changing its mind.",
+    description:
+      "A live-ish tap on shell companies that orbit Dark Shark without being invited in. Useful if you enjoy watching other people's confidence collapse.",
+    specs: [
+      { k: "Update", v: "Hourly" },
+      { k: "Window", v: "30 days" },
+      { k: "Source", v: "Ada, allegedly" },
+      { k: "Export", v: "Read once" },
+    ],
+    origin: "North Mast spill",
+    clearance: "STREET+",
+  },
+  {
+    id: "dock-manifest",
+    sku: "DS-1403",
+    name: "Dock Manifest",
+    category: "Intelligence",
+    price: 6750,
+    vendorId: "ada",
+    rarity: "STREET",
+    stock: 8,
+    heat: 62,
+    delta: 0.9,
+    tagline: "What arrived. What was supposed to.",
+    description:
+      "A leaked manifest from Dock Spine with two columns that refuse to match. The interesting freight is whatever sits in the gap.",
+    specs: [
+      { k: "Berths", v: "14" },
+      { k: "Age", v: "6 days" },
+      { k: "Ink", v: "Some of it real" },
+      { k: "Copy", v: "Yours alone" },
+    ],
+    origin: "Dock clerk, retired",
+    clearance: "OPEN",
+  },
+  {
+    id: "blank-chip",
+    sku: "DS-1501",
+    name: "Blank Civic Chip",
+    category: "Black Market",
+    price: 31000,
+    vendorId: "puck",
+    rarity: "BLACK",
+    stock: 2,
+    heat: 93,
+    delta: 8.2,
+    tagline: "A name you have not worn yet.",
+    description:
+      "An empty civic token. Dark Shark does not write the name for you. It only confirms the plastic is quiet enough to accept one.",
+    specs: [
+      { k: "State", v: "Unwritten" },
+      { k: "Band", v: "Civic" },
+      { k: "Trace", v: "Scrubbed" },
+      { k: "Promise", v: "None" },
+    ],
+    origin: "The Gutter",
+    clearance: "BLACK CHANNEL",
+  },
+  {
+    id: "ash-protocol",
+    sku: "DS-1502",
+    name: "Ash Protocol",
+    category: "Black Market",
+    price: 17800,
+    vendorId: "puck",
+    rarity: "RESTRICTED",
+    stock: 3,
+    heat: 75,
+    delta: 1.6,
+    tagline: "A weekend with no footprint.",
+    description:
+      "A kit of routines, routes, and excuses for disappearing until Monday. It is theater with good props. Theater is what the cameras believe.",
+    specs: [
+      { k: "Window", v: "72 hours" },
+      { k: "Includes", v: "Routes, phrases, a coat" },
+      { k: "Support", v: "None after dusk" },
+      { k: "Tone", v: "Unsentimental" },
+    ],
+    origin: "Puck Nine",
+    clearance: "TIER 3",
+  },
+  {
+    id: "leviathan-key",
+    sku: "DS-1503",
+    name: "Leviathan Key",
+    category: "Black Market",
+    price: 88000,
+    vendorId: "frey",
+    rarity: "BLACK",
+    stock: 1,
+    heat: 99,
+    delta: 11,
+    tagline: "A fragment of a story the market tells itself.",
+    description:
+      "The house lists one fragment. It does not open a vault. It opens a clearance the terminal still pretends is a myth. Frey smiles when asked what lock it fits.",
+    specs: [
+      { k: "Form", v: "Cut shard" },
+      { k: "Match", v: "Unknown" },
+      { k: "Copies", v: "This is the rumor" },
+      { k: "Desk", v: "Frey only" },
+    ],
+    origin: "North Mast",
+    clearance: "LEVIATHAN",
+  },
+  {
+    id: "red-pass",
+    sku: "DS-1504",
+    name: "Red Indulgence",
+    category: "Black Market",
+    price: 4200,
+    vendorId: "frey",
+    rarity: "RARE",
+    stock: 9,
+    heat: 48,
+    delta: 0.3,
+    tagline: "Forgiveness, prepaid.",
+    description:
+      "A house pass that makes one minor scandal boring to the right people. It will not cover a coup. It will cover a dinner that got out of hand.",
+    specs: [
+      { k: "Uses", v: "1" },
+      { k: "Scope", v: "Social, not capital" },
+      { k: "Issuer", v: "Frey Desk" },
+      { k: "Expiry", v: "End of cycle" },
+    ],
+    origin: "North Mast",
+    clearance: "STREET+",
+  },
+];
+
+export const vendors: Vendor[] = [...coreVendors, ...extraVendors];
+export const products: Product[] = [...coreProducts, ...extraProducts];
+
+export const featuredIds = ["abyss-deck", "alley-orange", "contract-name", "red-static"];
+
+export const freyLines = [
+  "We don't follow the market. We own it.",
+  "Loyalty is a rounding error.",
+  "If it has a pulse, it has a price.",
+  "Trust is what you sell when the goods are late.",
+  "The city is a ledger. I am the pen.",
+  "Everyone is early until they meet my invoice.",
+];
+
+export const whispers: [string, string][] = [
+  ["HEAT", "Dock Spine volume jumped in the last hour."],
+  ["FREY", "Margins are a moral position."],
+  ["NODE", "Upper Glass handshake renewed."],
+  ["WATCH", "A restricted lot just cleared the yard."],
+  ["CANAL", "Ash fog is eating short-range radio."],
+  ["DESK", "The house is buying its own rumor again."],
+  ["GUTTER", "Puck Nine changed the kiosk color. Stock did not."],
+  ["YARD", "Morrow has one coupe and too many friends."],
+];
+
+export const wire = [
+  { t: "04:11:02", m: "Frey Desk cleared a restricted optic into Chrome Ward." },
+  { t: "04:11:19", m: "Heat index crossed CRITICAL along the Ash Canals." },
+  { t: "04:12:04", m: "Puck Nine listed a blank civic chip. Two bids already." },
+  { t: "04:12:40", m: "Morrow Quay rolled the Pall Coupe off the show cage." },
+  { t: "04:13:11", m: "Ada Veil sealed the Glass Ward file for another cycle." },
+];
+
+export const volumeSeries = [18, 22, 19, 28, 26, 34, 31, 44, 40, 37, 49, 46, 58, 52, 61, 57, 63, 72, 68, 77, 74, 81, 79, 88, 84, 91, 86, 96];
+export const heatSeries = [40, 42, 38, 46, 51, 48, 55, 60, 58, 63, 61, 70, 66, 72, 69, 74, 71, 78, 80, 76, 83, 79, 86, 84, 90, 88, 92, 95];
+
+export const tickerBits = [
+  "DARK SHARK // VESPER NODE 07",
+  "EVERYTHING HAS A PRICE",
+  "FICTIONAL LEDGER — NO PAYMENT LEAVES THIS BROWSER",
+  "WE DON'T FOLLOW THE MARKET. WE OWN IT.",
+  "CLEARANCE IS A PRODUCT",
+  "BORYN FREY IS NOT TAKING QUESTIONS",
+];
+
+export function getProduct(id: string) {
+  return products.find((p) => p.id === id);
+}
+
+export function getVendor(id: string) {
+  return vendors.find((v) => v.id === id);
+}
+
+export function getDistrict(id: string) {
+  return districts.find((d) => d.id === id);
+}
+
+export function findLot(query: string) {
+  const q = query.trim().toLowerCase();
+  return products.find((p) => {
+    const ruName = (p.ru ?? legacyRu[p.id])?.name.toLowerCase() ?? "";
+    return p.sku.toLowerCase() === q || p.id === q || p.name.toLowerCase() === q || ruName === q;
+  });
+}
+
+export function cartTotal(lines: CartLine[]) {
+  return lines.reduce((sum, line) => {
+    const product = getProduct(line.id);
+    return sum + (product ? product.price * line.qty : 0);
+  }, 0);
+}
+
+export function productsByVendor(id: string) {
+  return products.filter((p) => p.vendorId === id);
+}
+
+export function isCategory(value: string | null): value is Category {
+  return !!value && (categories as readonly string[]).includes(value);
+}
