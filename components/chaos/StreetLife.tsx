@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 import { useI18n } from "@/lib/i18n";
 import { tone } from "@/lib/audio";
 import { useMarket } from "@/lib/store";
@@ -94,11 +94,11 @@ export function StreetLife({ active }: { active: boolean }) {
           key={catRun}
           type="button"
           onClick={pet}
-          className="stray-run fixed bottom-10 left-0 z-[66] w-40"
+          className="stray-run fixed bottom-8 left-0 z-[66] bg-transparent p-0"
           aria-label={locale === "ru" ? "Переулочный кот" : "Alley cat"}
         >
           <span className="stray-bob block">
-            <AlleyCat />
+            <PixelCat />
           </span>
         </button>
       )}
@@ -154,20 +154,76 @@ function Mask() {
   );
 }
 
-function AlleyCat() {
+const FUR = "#f4f1ea";
+const INK = "#080808";
+
+const WALK = [
+  [
+    ".....................##.##..........",
+    "....................#@@#@@#.........",
+    "...................#@@@@@@@#........",
+    "..................#@@@@@@@@@#.......",
+    "..........##.....#@@@@@@@@@@@#......",
+    ".........#@@#...#@@@@@@#@#@@@@#.....",
+    ".........#@@@###@@@@@@@@@@@@@#......",
+    "..........#@@@@@@@@@@@@@@@@@@#......",
+    "...........#@@@@@@@@@@@@@@@@#.......",
+    "............#@@@@@@@@@@@@@@#........",
+    ".............#@@@@@@@@@@@@#.........",
+    "..............#@@@#....#@@#.........",
+    "..............#@@@#....#@@#.........",
+    "...............#@@#.....#@#.........",
+    "................#@#......#..........",
+  ],
+  [
+    ".....................##.##..........",
+    "....................#@@#@@#.........",
+    "...................#@@@@@@@#........",
+    "..................#@@@@@@@@@#.......",
+    "..........##.....#@@@@@@@@@@@#......",
+    ".........#@@#...#@@@@@@#@#@@@@#.....",
+    ".........#@@@###@@@@@@@@@@@@@#......",
+    "..........#@@@@@@@@@@@@@@@@@@#......",
+    "...........#@@@@@@@@@@@@@@@@#.......",
+    "............#@@@@@@@@@@@@@@#........",
+    ".............#@@@@@@@@@@@@#.........",
+    "............#@@@#......#@@@#........",
+    ".............#@@#......#@@#.........",
+    "..............#@#.......#@#.........",
+    "...............#.........#..........",
+  ],
+] as const;
+
+function PixelCat() {
+  const width = WALK[0][0].length;
+  const height = WALK[0].length;
   return (
-    <svg viewBox="0 0 180 70" className="h-16 w-40" aria-hidden>
-      <ellipse cx="78" cy="40" rx="36" ry="16" fill="#e07020" />
-      <circle cx="118" cy="32" r="14" fill="#e07020" />
-      <path d="M108 22 L112 10 L120 20" fill="#c45412" />
-      <path d="M122 20 L130 8 L132 22" fill="#c45412" />
-      <path d="M46 36 C20 20, 8 28, 4 40" fill="none" stroke="#e07020" strokeWidth="4" />
-      <rect x="62" y="50" width="6" height="12" fill="#2a140c" />
-      <rect x="86" y="50" width="6" height="12" fill="#2a140c" />
-      <circle cx="124" cy="31" r="1.6" fill="#080808" />
-      <rect x="18" y="46" width="16" height="14" fill="#d8d2c8" stroke="#080808" />
-      <path d="M26 46 V38" stroke="#ff253a" />
-      <circle cx="26" cy="36" r="2" fill="#ff253a" />
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      width={width * 6}
+      height={height * 6}
+      shapeRendering="crispEdges"
+      className="cat-step"
+      aria-hidden
+    >
+      <Sprite rows={WALK[0]} />
+      <g className="cat-frame-b">
+        <Sprite rows={WALK[1]} />
+      </g>
     </svg>
   );
+}
+
+function Sprite({ rows }: { rows: readonly string[] }) {
+  const rects: ReactElement[] = [];
+  rows.forEach((row, y) => {
+    for (let x = 0; x < row.length; x += 1) {
+      const bit = row[x];
+      if (bit === ".") continue;
+      rects.push(
+        <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill={bit === "@" ? FUR : INK} />,
+      );
+    }
+  });
+  return <g>{rects}</g>;
 }

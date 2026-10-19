@@ -167,7 +167,16 @@ body::before {
 }
 
 .stray-bob {
-  animation: bob 0.16s steps(2, end) infinite;
+  animation: bob 0.4s steps(2, end) infinite;
+}
+
+.cat-step {
+  image-rendering: pixelated;
+}
+
+.cat-frame-b {
+  opacity: 0;
+  animation: cat-step 0.4s steps(1, end) infinite;
 }
 
 .hijack-burst {
@@ -191,7 +200,14 @@ body::before {
 
 @keyframes bob {
   50% {
-    transform: translateY(-4px) rotate(-2deg);
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes cat-step {
+  50%,
+  100% {
+    opacity: 1;
   }
 }
 
